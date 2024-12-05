@@ -133,6 +133,7 @@ class Jkbms_Ble(Battery):
         return self.unique_identifier_tmp
 
     def use_callback(self, callback: Callable) -> bool:
+        return False
         self.jk.set_callback(callback)
         return callback is not None
 
@@ -149,7 +150,8 @@ class Jkbms_Ble(Battery):
 
         last_update = int(time() - st["last_update"])
         if last_update >= 15 and last_update % 15 == 0:
-            logger.info(f"Jkbms_Ble: Bluetooth connection interrupted. Got no fresh data since {last_update}s.")
+            logger.info(f"Jkbms_Ble: Bluetooth connection interrupted. Got no fresh data since {last_update} s.")
+
             # show Bluetooth signal strength (RSSI)
             bluetoothctl_info = os.popen("bluetoothctl info " + self.address + ' | grep -i -E "device|name|alias|pair|trusted|blocked|connected|rssi|power"')
             logger.info(bluetoothctl_info.read())
@@ -157,12 +159,12 @@ class Jkbms_Ble(Battery):
 
             # if the thread is still alive but data too old there is something
             # wrong with the bt-connection; restart whole stack
-            if not self.resetting and last_update >= 60:
+            if not self.resetting and last_update >= 30:
                 logger.error("Jkbms_Ble: Bluetooth died. Restarting Bluetooth system driver.")
-                self.reset_bluetooth()
-                sleep(2)
-                self.jk.start_scraping()
-                sleep(2)
+                # self.reset_bluetooth()
+                # sleep(2)
+                # self.jk.start_scraping()
+                # sleep(2)
 
             return False
         else:
@@ -226,6 +228,9 @@ class Jkbms_Ble(Battery):
         self.protection.high_charge_temp = 2 if st["warnings"]["charge_overtemp"] else 0
         self.protection.low_charge_temp = 2 if st["warnings"]["charge_undertemp"] else 0
         self.protection.high_temperature = 2 if st["warnings"]["discharge_overtemp"] else 0
+
+        # logger.info(f"current: {self.current} - voltage: {self.voltage} - temp MOS: {self.temp_mos} - temp1: {self.temp1} - temp2: {self.temp2}")
+
         return True
 
     def reset_bluetooth(self):
@@ -255,3 +260,8 @@ class Jkbms_Ble(Battery):
             self.jk.max_cell_voltage = self.get_max_cell_voltage()
             self.jk.trigger_soc_reset = True
         return
+
+    def disconnect(self):
+        self.jk.stop_scraping()
+        os.popen("bluetoothctl disconnect " + self.address)
+        logger.info("Disconnected from " + self.address)

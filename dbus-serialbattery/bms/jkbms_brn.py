@@ -151,7 +151,7 @@ class Jkbms_Brn:
     def __init__(self, addr, reset_bt_callback=None):
         self.address = addr
         self.bt_thread = None
-        self.bt_thread_monitor = threading.Thread(target=self.monitor_scraping, name="Thread-JKBMS-Monitor")
+        # self.bt_thread_monitor = threading.Thread(target=self.monitor_scraping, name="Thread-JKBMS-Monitor")
         self.bt_reset = reset_bt_callback
         self.should_be_scraping = False
         self.trigger_soc_reset = False
@@ -519,7 +519,7 @@ class Jkbms_Brn:
         logger.info("--> asy_connect_and_scrape(): Exit")
 
     def monitor_scraping(self):
-        while self.should_be_scraping is True:
+        while self.should_be_scraping is True and self.main_thread.is_alive():
             self.bt_thread = threading.Thread(target=self.connect_and_scrape, name="Thread-JKBMS-Connect-and-Scrape")
             self.bt_thread.start()
             logger.debug("scraping thread started -> main thread id: " + str(self.main_thread.ident) + " scraping thread: " + str(self.bt_thread.ident))
@@ -536,7 +536,7 @@ class Jkbms_Brn:
             logger.debug("scraping thread already running")
             return
         self.should_be_scraping = True
-        self.bt_thread_monitor.start()
+        # self.bt_thread_monitor.start()
 
     def stop_scraping(self):
         self.run = False
