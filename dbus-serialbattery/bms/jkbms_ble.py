@@ -213,12 +213,12 @@ class Jkbms_Ble(Battery):
         # self.protection.low_soc = 2 if status["cell_info"]["battery_soc"] < 10.0 else 0
 
         # trigger cell imbalance warning when delta is to great
-        if st["cell_info"]["delta_cell_voltage"] > min(st["settings"]["cell_ovp"] * 0.05, 0.200):
-            self.protection.cell_imbalance = 2
-        elif st["cell_info"]["delta_cell_voltage"] > min(st["settings"]["cell_ovp"] * 0.03, 0.120):
-            self.protection.cell_imbalance = 1
-        else:
-            self.protection.cell_imbalance = 0
+        # if st["cell_info"]["delta_cell_voltage"] > min(st["settings"]["cell_ovp"] * 0.05, 0.200):
+        #     self.protection.cell_imbalance = 2
+        # elif st["cell_info"]["delta_cell_voltage"] > min(st["settings"]["cell_ovp"] * 0.03, 0.120):
+        #     self.protection.cell_imbalance = 1
+        # else:
+        #     self.protection.cell_imbalance = 0
 
         self.protection.high_cell_voltage = 2 if st["warnings"]["cell_overvoltage"] else 0
         self.protection.low_cell_voltage = 2 if st["warnings"]["cell_undervoltage"] else 0
